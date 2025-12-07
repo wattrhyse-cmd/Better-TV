@@ -1,80 +1,66 @@
+
 import { StreamCategory, StreamItem, AppTheme } from './types';
 
-// Themes
+// Themes - Futuristic / Cyberpunk Overhaul
 export const APP_THEMES: AppTheme[] = [
   {
-    id: 'midnight',
-    name: 'Midnight Blue',
+    id: 'cyberpunk',
+    name: 'Neon City',
     colors: {
-      background: 'bg-[#0f172a]',
-      sidebar: 'bg-[#0b1120]',
-      cardBg: 'bg-slate-800',
+      background: 'bg-[#030014]', // Deepest space blue/black
+      sidebar: 'bg-[#0a0a1f]/60',
+      cardBg: 'bg-[#1a1a40]/40',
       textAccent: 'text-cyan-400',
-      bgAccent: 'bg-cyan-600',
-      bgAccentHover: 'hover:bg-cyan-500',
-      borderAccent: 'border-cyan-500',
-      gradient: 'from-cyan-400 to-blue-500',
-      iconBg: 'bg-cyan-500/20'
+      bgAccent: 'bg-cyan-500',
+      bgAccentHover: 'hover:bg-cyan-400',
+      borderAccent: 'border-cyan-500/50',
+      gradient: 'from-cyan-500 to-blue-600',
+      iconBg: 'bg-cyan-500/10'
     }
   },
   {
-    id: 'crimson',
-    name: 'Crimson Red',
+    id: 'synthwave',
+    name: 'Synthwave',
     colors: {
-      background: 'bg-[#000000]',
-      sidebar: 'bg-[#121212]',
-      cardBg: 'bg-zinc-900',
-      textAccent: 'text-red-500',
-      bgAccent: 'bg-red-600',
-      bgAccentHover: 'hover:bg-red-500',
-      borderAccent: 'border-red-600',
-      gradient: 'from-red-500 to-rose-600',
-      iconBg: 'bg-red-600/20'
+      background: 'bg-[#0f0014]',
+      sidebar: 'bg-[#1a0024]/60',
+      cardBg: 'bg-[#2a0038]/40',
+      textAccent: 'text-fuchsia-400',
+      bgAccent: 'bg-fuchsia-600',
+      bgAccentHover: 'hover:bg-fuchsia-500',
+      borderAccent: 'border-fuchsia-500/50',
+      gradient: 'from-fuchsia-500 to-purple-600',
+      iconBg: 'bg-fuchsia-500/10'
     }
   },
   {
-    id: 'ocean',
-    name: 'Deep Ocean',
+    id: 'matrix',
+    name: 'Matrix',
     colors: {
-      background: 'bg-slate-900',
-      sidebar: 'bg-slate-950',
-      cardBg: 'bg-slate-800',
-      textAccent: 'text-teal-400',
-      bgAccent: 'bg-teal-600',
-      bgAccentHover: 'hover:bg-teal-500',
-      borderAccent: 'border-teal-500',
-      gradient: 'from-teal-400 to-cyan-400',
-      iconBg: 'bg-teal-500/20'
+      background: 'bg-[#000d00]',
+      sidebar: 'bg-[#001a00]/60',
+      cardBg: 'bg-[#002b00]/40',
+      textAccent: 'text-green-400',
+      bgAccent: 'bg-green-600',
+      bgAccentHover: 'hover:bg-green-500',
+      borderAccent: 'border-green-500/50',
+      gradient: 'from-green-500 to-emerald-600',
+      iconBg: 'bg-green-500/10'
     }
   },
   {
-    id: 'forest',
-    name: 'Forest',
+    id: 'solar',
+    name: 'Solar Flare',
     colors: {
-      background: 'bg-neutral-900',
-      sidebar: 'bg-neutral-950',
-      cardBg: 'bg-neutral-800',
-      textAccent: 'text-emerald-500',
-      bgAccent: 'bg-emerald-600',
-      bgAccentHover: 'hover:bg-emerald-500',
-      borderAccent: 'border-emerald-500',
-      gradient: 'from-emerald-400 to-green-500',
-      iconBg: 'bg-emerald-500/20'
-    }
-  },
-  {
-    id: 'royal',
-    name: 'Royal Purple',
-    colors: {
-      background: 'bg-[#1a0b2e]',
-      sidebar: 'bg-[#130722]',
-      cardBg: 'bg-[#2d1b4e]',
-      textAccent: 'text-purple-400',
-      bgAccent: 'bg-purple-600',
-      bgAccentHover: 'hover:bg-purple-500',
-      borderAccent: 'border-purple-500',
-      gradient: 'from-purple-400 to-pink-500',
-      iconBg: 'bg-purple-500/20'
+      background: 'bg-[#0f0500]',
+      sidebar: 'bg-[#1f0a00]/60',
+      cardBg: 'bg-[#331100]/40',
+      textAccent: 'text-orange-400',
+      bgAccent: 'bg-orange-600',
+      bgAccentHover: 'hover:bg-orange-500',
+      borderAccent: 'border-orange-500/50',
+      gradient: 'from-orange-500 to-red-600',
+      iconBg: 'bg-orange-500/10'
     }
   }
 ];

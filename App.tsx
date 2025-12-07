@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
-import { User, Lock, Server, PlayCircle, Search, AlertCircle, Sparkles, Send, Tv, Play, Info, ArrowLeft, Star, Clock, Wifi, Check, Palette, Trophy, Calendar, Captions, Download, Smartphone, Heart, RefreshCw, CloudDownload, Globe, ShieldCheck, Activity, List, Link as LinkIcon, Edit3 } from 'lucide-react';
+import { User, Lock, Server, PlayCircle, Search, AlertCircle, Sparkles, Send, Tv, Play, Info, ArrowLeft, Star, Clock, Wifi, Check, Palette, Trophy, Calendar, Captions, Download, Smartphone, Heart, RefreshCw, CloudDownload, Globe, ShieldCheck, Activity, List, Link as LinkIcon, Edit3, Loader2 } from 'lucide-react';
 
 import VideoPlayer from './components/VideoPlayer';
 import Sidebar from './components/Sidebar';
-import { LoginCredentials, StreamItem, StreamCategory, AppView, StreamType, AppTheme, EPGProgram } from './types';
+import { LoginCredentials, StreamItem, StreamCategory, AppView, StreamType, AppTheme, EPGProgram, XtreamLiveStream, XtreamVodStream, XtreamSeriesStream } from './types';
 import { MOCK_CATEGORIES, MOCK_STREAMS, APP_THEMES } from './constants';
 import { getAIRecommendations } from './services/geminiService';
+import { authenticateUser, fetchXtreamData, mapLiveStreamToItem, mapVodStreamToItem, mapSeriesStreamToItem } from './services/iptvService';
 
 // --- EPG Helper Functions ---
 const generateMockEPG = (stream: StreamItem, now: Date): { current: EPGProgram, next: EPGProgram } => {
@@ -85,6 +86,7 @@ const App: React.FC = () => {
   const [credentials, setCredentials] = useState<LoginCredentials>({ name: '', url: '', username: '', password: '' });
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
 
   // Data State
   const [categories, setCategories] = useState<StreamCategory[]>([]);
@@ -160,36 +162,128 @@ const App: React.FC = () => {
 
   useEffect(() => {
      // Set a random hero image from movies
-     const movies = MOCK_STREAMS.filter(s => s.stream_type === StreamType.MOVIE);
+     const movies = streams.filter(s => s.stream_type === StreamType.MOVIE);
      if (movies.length > 0) {
          setHeroImage(movies[Math.floor(Math.random() * movies.length)].stream_icon || '');
      }
   }, [streams]);
 
-  // Mock Login Process
-  const handleLogin = (e: React.FormEvent) => {
+  // Login Process
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoggingIn(true);
     setLoginError('');
+    setIsLoggingIn(true);
+    setLoadingMessage('Authenticating...');
 
-    setTimeout(() => {
-      if (loginMethod === 'XTREAM') {
-          if (credentials.username && credentials.password && credentials.url) {
-            completeLogin();
-          } else {
+    if (loginMethod === 'XTREAM') {
+        if (!credentials.username || !credentials.password || !credentials.url) {
             setLoginError('Please fill in all required fields');
             setIsLoggingIn(false);
-          }
-      } else {
-          // M3U Login Mock
-          setLoginError('M3U playlist support coming soon');
-          setIsLoggingIn(false);
-      }
-    }, 1500);
+            return;
+        }
+
+        // --- URL Sanitization ---
+        let serverUrl = credentials.url.trim();
+        // Automatically add http:// if protocol is missing
+        if (!/^https?:\/\//i.test(serverUrl)) {
+            serverUrl = `http://${serverUrl}`;
+        }
+        // Remove trailing slash for consistency
+        serverUrl = serverUrl.replace(/\/$/, '');
+
+        // Use these normalized credentials for all API calls
+        const finalCredentials = { ...credentials, url: serverUrl };
+        
+        // Update state to reflect the fixed URL
+        setCredentials(finalCredentials);
+
+        try {
+            // 1. Authenticate
+            const authResponse = await authenticateUser(finalCredentials);
+            if (!authResponse) {
+                // This shouldn't happen with the new service throwing errors, but as a fallback
+                throw new Error('Invalid response from server');
+            }
+
+            // 2. Fetch Data
+            setLoadingMessage('Fetching Live Categories...');
+            const liveCats = await fetchXtreamData(finalCredentials, 'get_live_categories');
+            
+            setLoadingMessage('Fetching Live Channels...');
+            const liveStreams = await fetchXtreamData(finalCredentials, 'get_live_streams');
+
+            setLoadingMessage('Fetching VOD Categories...');
+            const vodCats = await fetchXtreamData(finalCredentials, 'get_vod_categories');
+
+            setLoadingMessage('Fetching Movies...');
+            const vodStreams = await fetchXtreamData(finalCredentials, 'get_vod_streams');
+            
+            setLoadingMessage('Fetching Series...');
+            const seriesCats = await fetchXtreamData(finalCredentials, 'get_series_categories');
+            const seriesStreams = await fetchXtreamData(finalCredentials, 'get_series');
+
+            // 3. Process Data
+            setLoadingMessage('Processing content...');
+            
+            // Map Categories
+            const allCats: StreamCategory[] = [
+                ...liveCats,
+                ...vodCats,
+                ...seriesCats
+            ];
+
+            // Map Streams
+            const mappedLive = liveStreams.map((s: XtreamLiveStream) => mapLiveStreamToItem(s, finalCredentials));
+            const mappedVod = vodStreams.map((s: XtreamVodStream) => mapVodStreamToItem(s, finalCredentials));
+            const mappedSeries = seriesStreams.map((s: XtreamSeriesStream) => mapSeriesStreamToItem(s));
+
+            const allStreams = [...mappedLive, ...mappedVod, ...mappedSeries];
+
+            setCategories(allCats);
+            setStreams(allStreams);
+            setIsAuthenticated(true);
+            setCurrentView('DASHBOARD');
+            
+        } catch (err: any) {
+            console.error("Login Error:", err);
+            let message = 'Connection failed. Please check your credentials.';
+
+            // Improve error messaging for common CORS/Mixed Content issues
+            const errorMessage = err.message || '';
+            const isNetworkError = errorMessage.includes('NetworkError') || errorMessage.includes('Failed to fetch');
+            
+            if (isNetworkError) {
+                const isHttps = window.location.protocol === 'https:';
+                const isHttpTarget = finalCredentials.url.toLowerCase().startsWith('http:');
+                
+                if (isHttps && isHttpTarget) {
+                    message = 'Mixed Content Error: You are trying to connect to an unsecured HTTP server from a secure HTTPS app. Browser security blocks this.';
+                } else {
+                    message = 'Network Error: The server blocked the connection (CORS). Your provider may not allow browser-based streaming.';
+                }
+            } else if (errorMessage.includes('401') || errorMessage.includes('403')) {
+                message = 'Access Denied: Invalid username or password.';
+            } else if (errorMessage.includes('404')) {
+                message = 'Server Not Found: Check the URL/DNS.';
+            }
+
+            setLoginError(message);
+        } finally {
+            setIsLoggingIn(false);
+            setLoadingMessage('');
+        }
+    } else {
+        // M3U Login Mock
+        setTimeout(() => {
+             setLoginError('M3U playlist support coming soon');
+             setIsLoggingIn(false);
+        }, 1000);
+    }
   };
 
   const loadDemo = () => {
     setIsLoggingIn(true);
+    setLoadingMessage('Loading Demo Environment...');
     setTimeout(() => {
         setCredentials({
             name: 'Demo Playlist',
@@ -197,16 +291,13 @@ const App: React.FC = () => {
             username: 'demo_user',
             password: 'demo_password'
         });
-        completeLogin();
-    }, 1000);
-  };
-
-  const completeLogin = () => {
-    setIsAuthenticated(true);
-    setCategories(MOCK_CATEGORIES);
-    setStreams(MOCK_STREAMS);
-    setIsLoggingIn(false);
-    setCurrentView('DASHBOARD');
+        setCategories(MOCK_CATEGORIES);
+        setStreams(MOCK_STREAMS);
+        setIsAuthenticated(true);
+        setCurrentView('DASHBOARD');
+        setIsLoggingIn(false);
+        setLoadingMessage('');
+    }, 1500);
   };
 
   const handleLogout = () => {
@@ -214,6 +305,8 @@ const App: React.FC = () => {
     setCredentials({ name: '', url: '', username: '', password: '' });
     setSelectedStream(null);
     setCurrentView('LOGIN');
+    setStreams([]);
+    setCategories([]);
   };
 
   const handleStreamProgress = useCallback((progress: number) => {
@@ -454,9 +547,14 @@ const App: React.FC = () => {
                     <button 
                         type="submit" 
                         disabled={isLoggingIn}
-                        className={`w-full bg-gradient-to-r ${currentTheme.colors.gradient} hover:opacity-90 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-2`}
+                        className={`w-full bg-gradient-to-r ${currentTheme.colors.gradient} hover:opacity-90 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-2 flex items-center justify-center`}
                     >
-                        {isLoggingIn ? 'Authenticating...' : 'Connect Provider'}
+                        {isLoggingIn ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {loadingMessage || 'Authenticating...'}
+                            </>
+                        ) : 'Connect Provider'}
                     </button>
                 </form>
             ) : (
@@ -478,6 +576,7 @@ const App: React.FC = () => {
             <div className="mt-6 text-center border-t border-white/5 pt-6">
                 <button 
                     onClick={loadDemo}
+                    disabled={isLoggingIn}
                     className={`text-xs text-slate-500 hover:${currentTheme.colors.textAccent} transition-colors`}
                 >
                     Load Demo Playlist

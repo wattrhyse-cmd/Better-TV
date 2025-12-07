@@ -29,8 +29,9 @@ export interface StreamItem {
   category_id: string;
   rating?: string;
   rating_5based?: number;
-  direct_source?: string; // For mock playback
-  progress?: number; // Percentage watched (0-100)
+  direct_source?: string;
+  container_extension?: string;
+  progress?: number;
   subtitles?: SubtitleTrack[];
 }
 
@@ -41,7 +42,7 @@ export interface EPGProgram {
   description: string;
 }
 
-export interface XTreamLoginResponse {
+export interface XtreamLoginResponse {
   user_info: {
     username: string;
     password: string;
@@ -64,6 +65,43 @@ export interface XTreamLoginResponse {
     timestamp_now: number;
     time_now: string;
   };
+}
+
+// Raw API Interfaces
+export interface XtreamLiveStream {
+  num: number | string;
+  name: string;
+  stream_type: string;
+  stream_id: number | string;
+  stream_icon?: string;
+  epg_channel_id?: string;
+  added?: string;
+  category_id: string;
+  tv_archive?: number;
+  direct_source?: string;
+}
+
+export interface XtreamVodStream {
+  num: number | string;
+  name: string;
+  stream_type: string;
+  stream_id: number | string;
+  stream_icon?: string;
+  added?: string;
+  category_id: string;
+  container_extension?: string;
+  rating?: string;
+  direct_source?: string;
+}
+
+export interface XtreamSeriesStream {
+    num: number | string;
+    name: string;
+    series_id: number | string;
+    cover?: string;
+    plot?: string;
+    category_id: string;
+    rating?: string;
 }
 
 export interface LoginCredentials {
