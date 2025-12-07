@@ -67,6 +67,7 @@ export interface XTreamLoginResponse {
 }
 
 export interface LoginCredentials {
+  name?: string;
   url: string;
   username: string;
   password: string;

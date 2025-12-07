@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
-import { User, Lock, Server, PlayCircle, Search, AlertCircle, Sparkles, Send, Tv, Play, Info, ArrowLeft, Star, Clock, Wifi, Check, Palette, Trophy, Calendar, Captions, Download, Smartphone, Heart, RefreshCw, CloudDownload } from 'lucide-react';
+import { User, Lock, Server, PlayCircle, Search, AlertCircle, Sparkles, Send, Tv, Play, Info, ArrowLeft, Star, Clock, Wifi, Check, Palette, Trophy, Calendar, Captions, Download, Smartphone, Heart, RefreshCw, CloudDownload, Globe, ShieldCheck, Activity, List, Link as LinkIcon, Edit3 } from 'lucide-react';
 
 import VideoPlayer from './components/VideoPlayer';
 import Sidebar from './components/Sidebar';
@@ -81,7 +81,8 @@ const App: React.FC = () => {
   const [updateProgress, setUpdateProgress] = useState(0);
 
   // Login Form State
-  const [credentials, setCredentials] = useState<LoginCredentials>({ url: '', username: '', password: '' });
+  const [loginMethod, setLoginMethod] = useState<'XTREAM' | 'M3U'>('XTREAM');
+  const [credentials, setCredentials] = useState<LoginCredentials>({ name: '', url: '', username: '', password: '' });
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -172,11 +173,17 @@ const App: React.FC = () => {
     setLoginError('');
 
     setTimeout(() => {
-      if (credentials.username && credentials.password && credentials.url) {
-        completeLogin();
+      if (loginMethod === 'XTREAM') {
+          if (credentials.username && credentials.password && credentials.url) {
+            completeLogin();
+          } else {
+            setLoginError('Please fill in all required fields');
+            setIsLoggingIn(false);
+          }
       } else {
-        setLoginError('Please fill in all fields');
-        setIsLoggingIn(false);
+          // M3U Login Mock
+          setLoginError('M3U playlist support coming soon');
+          setIsLoggingIn(false);
       }
     }, 1500);
   };
@@ -185,7 +192,8 @@ const App: React.FC = () => {
     setIsLoggingIn(true);
     setTimeout(() => {
         setCredentials({
-            url: 'http://demo-iptv.com',
+            name: 'Demo Playlist',
+            url: 'http://demo-iptv.com:3330',
             username: 'demo_user',
             password: 'demo_password'
         });
@@ -203,7 +211,7 @@ const App: React.FC = () => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setCredentials({ url: '', username: '', password: '' });
+    setCredentials({ name: '', url: '', username: '', password: '' });
     setSelectedStream(null);
     setCurrentView('LOGIN');
   };
@@ -345,86 +353,134 @@ const App: React.FC = () => {
             <div className="absolute bottom-[0%] -right-[10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px]"></div>
         </div>
 
-        <div className="w-full max-w-md bg-white/5 backdrop-blur-2xl p-10 rounded-3xl border border-white/10 shadow-2xl z-10 relative">
-            <div className="text-center mb-10">
-                <div className={`w-20 h-20 bg-gradient-to-tr ${currentTheme.colors.gradient} rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-xl transform rotate-3 hover:rotate-0 transition-all duration-500`}>
-                    <Tv className="text-white w-10 h-10" />
+        <div className="w-full max-w-md bg-white/5 backdrop-blur-2xl p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl z-10 relative">
+            <div className="text-center mb-8">
+                <div className={`w-16 h-16 bg-gradient-to-tr ${currentTheme.colors.gradient} rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xl`}>
+                    <Tv className="text-white w-8 h-8" />
                 </div>
-                <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">StreamGenie</h1>
-                <p className="text-slate-400 text-sm font-medium">Next-Generation IPTV Experience</p>
+                <h1 className="text-3xl font-bold text-white mb-1 tracking-tight">StreamGenie</h1>
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">Premium Player</p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Server URL</label>
-                    <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Server className={`h-5 w-5 text-slate-500 group-focus-within:${currentTheme.colors.textAccent} transition-colors`} />
-                        </div>
-                        <input 
-                            type="url" 
-                            className={`block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700/50 rounded-xl text-sm placeholder-slate-500 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 text-white transition-all`} 
-                            placeholder="http://provider.com:8080"
-                            value={credentials.url}
-                            onChange={(e) => setCredentials({...credentials, url: e.target.value})}
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
-                    <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <User className={`h-5 w-5 text-slate-500 group-focus-within:${currentTheme.colors.textAccent} transition-colors`} />
-                        </div>
-                        <input 
-                            type="text" 
-                            className={`block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700/50 rounded-xl text-sm placeholder-slate-500 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 text-white transition-all`} 
-                            placeholder="Username"
-                            value={credentials.username}
-                            onChange={(e) => setCredentials({...credentials, username: e.target.value})}
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
-                    <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Lock className={`h-5 w-5 text-slate-500 group-focus-within:${currentTheme.colors.textAccent} transition-colors`} />
-                        </div>
-                        <input 
-                            type="password" 
-                            className={`block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700/50 rounded-xl text-sm placeholder-slate-500 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 text-white transition-all`} 
-                            placeholder="••••••••"
-                            value={credentials.password}
-                            onChange={(e) => setCredentials({...credentials, password: e.target.value})}
-                        />
-                    </div>
-                </div>
-
-                {loginError && (
-                    <div className="flex items-center text-red-400 text-xs bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                        <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-                        {loginError}
-                    </div>
-                )}
-
+            {/* Login Method Tabs */}
+            <div className="flex p-1 bg-black/30 rounded-xl mb-6 border border-white/5">
                 <button 
-                    type="submit" 
-                    disabled={isLoggingIn}
-                    className={`w-full bg-gradient-to-r ${currentTheme.colors.gradient} hover:opacity-90 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed`}
+                    onClick={() => setLoginMethod('XTREAM')}
+                    className={`flex-1 flex items-center justify-center py-2.5 rounded-lg text-xs font-bold transition-all ${loginMethod === 'XTREAM' ? `${currentTheme.colors.bgAccent} text-white shadow-lg` : 'text-slate-400 hover:text-white'}`}
                 >
-                    {isLoggingIn ? 'Authenticating...' : 'Secure Login'}
+                    <List className="w-3.5 h-3.5 mr-2" /> Xtream Codes
                 </button>
-            </form>
+                <button 
+                    onClick={() => setLoginMethod('M3U')}
+                    className={`flex-1 flex items-center justify-center py-2.5 rounded-lg text-xs font-bold transition-all ${loginMethod === 'M3U' ? `${currentTheme.colors.bgAccent} text-white shadow-lg` : 'text-slate-400 hover:text-white'}`}
+                >
+                    <LinkIcon className="w-3.5 h-3.5 mr-2" /> M3U Playlist
+                </button>
+            </div>
 
-            <div className="mt-8 text-center">
+            {loginMethod === 'XTREAM' ? (
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Any Name</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Edit3 className={`h-4 w-4 text-slate-500 group-focus-within:${currentTheme.colors.textAccent} transition-colors`} />
+                            </div>
+                            <input 
+                                type="text" 
+                                className={`block w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700/50 rounded-xl text-sm placeholder-slate-600 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 text-white transition-all`} 
+                                placeholder="Playlist Name (Optional)"
+                                value={credentials.name || ''}
+                                onChange={(e) => setCredentials({...credentials, name: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <User className={`h-4 w-4 text-slate-500 group-focus-within:${currentTheme.colors.textAccent} transition-colors`} />
+                            </div>
+                            <input 
+                                type="text" 
+                                className={`block w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700/50 rounded-xl text-sm placeholder-slate-600 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 text-white transition-all`} 
+                                placeholder="Username"
+                                value={credentials.username}
+                                onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Lock className={`h-4 w-4 text-slate-500 group-focus-within:${currentTheme.colors.textAccent} transition-colors`} />
+                            </div>
+                            <input 
+                                type="password" 
+                                className={`block w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700/50 rounded-xl text-sm placeholder-slate-600 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 text-white transition-all`} 
+                                placeholder="••••••••"
+                                value={credentials.password}
+                                onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">DNS / URL</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Server className={`h-4 w-4 text-slate-500 group-focus-within:${currentTheme.colors.textAccent} transition-colors`} />
+                            </div>
+                            <input 
+                                type="text" 
+                                className={`block w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700/50 rounded-xl text-sm placeholder-slate-600 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 text-white transition-all`} 
+                                placeholder="http://provider.com:3330"
+                                value={credentials.url}
+                                onChange={(e) => setCredentials({...credentials, url: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    {loginError && (
+                        <div className="flex items-center text-red-400 text-xs bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                            <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
+                            {loginError}
+                        </div>
+                    )}
+
+                    <button 
+                        type="submit" 
+                        disabled={isLoggingIn}
+                        className={`w-full bg-gradient-to-r ${currentTheme.colors.gradient} hover:opacity-90 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-2`}
+                    >
+                        {isLoggingIn ? 'Authenticating...' : 'Connect Provider'}
+                    </button>
+                </form>
+            ) : (
+                <div className="py-12 text-center space-y-4">
+                     <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-2">
+                         <LinkIcon className="w-8 h-8 text-slate-600" />
+                     </div>
+                     <h3 className="text-white font-bold">M3U Playlist</h3>
+                     <p className="text-slate-400 text-sm px-6">Direct M3U/M3U8 playlist URL loading is coming soon in the next update.</p>
+                     <button 
+                        onClick={() => setLoginMethod('XTREAM')}
+                        className="text-cyan-400 text-sm hover:underline"
+                     >
+                        Use Xtream Codes instead
+                     </button>
+                </div>
+            )}
+
+            <div className="mt-6 text-center border-t border-white/5 pt-6">
                 <button 
                     onClick={loadDemo}
                     className={`text-xs text-slate-500 hover:${currentTheme.colors.textAccent} transition-colors`}
                 >
-                    Try Demo Account
+                    Load Demo Playlist
                 </button>
             </div>
         </div>
@@ -631,482 +687,83 @@ const App: React.FC = () => {
                     </div>
                 </div>
             )}
-
-            {/* --- LIVE TV & FAVORITES VIEW (Split Layout for Live, Grid for others) --- */}
-            {(currentView === 'LIVE' || (currentView === 'FAVORITES' && (selectedStream || filteredStreams.some(s => s.stream_type === StreamType.LIVE)))) && (
-                <div className="flex h-full flex-col md:flex-row">
-                    {/* Categories - Hidden in Favorites view or if stream selected */}
-                    {currentView !== 'FAVORITES' && (
-                        <div className={`w-full md:w-64 ${currentTheme.colors.sidebar} border-r border-slate-800 overflow-y-auto flex-shrink-0 ${selectedStream ? 'hidden md:block' : ''}`}>
-                            <div className="p-4">
-                                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">Categories</h3>
-                                <div className="flex flex-row overflow-x-auto gap-2 md:block md:space-y-1 pb-2 md:pb-0">
-                                    <button
-                                        onClick={() => setSelectedCategory(null)}
-                                        className={`whitespace-nowrap md:whitespace-normal w-auto md:w-full text-left px-4 py-2 md:py-3 rounded-xl text-sm font-medium transition-all flex-shrink-0 ${!selectedCategory ? `bg-gradient-to-r ${currentTheme.colors.gradient} text-white shadow-lg` : 'text-slate-400 hover:bg-slate-800 hover:text-white bg-slate-800/50 md:bg-transparent'}`}
-                                    >
-                                        All Channels
-                                    </button>
-                                    {activeCategories.map(cat => (
-                                        <button
-                                            key={cat.category_id}
-                                            onClick={() => setSelectedCategory(cat.category_id)}
-                                            className={`whitespace-nowrap md:whitespace-normal w-auto md:w-full text-left px-4 py-2 md:py-3 rounded-xl text-sm font-medium transition-all flex-shrink-0 ${selectedCategory === cat.category_id ? `bg-gradient-to-r ${currentTheme.colors.gradient} text-white shadow-lg` : 'text-slate-400 hover:bg-slate-800 hover:text-white bg-slate-800/50 md:bg-transparent'}`}
-                                        >
-                                            {cat.category_name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Channel List / Favorites List */}
-                    <div className={`${selectedStream ? 'hidden xl:block w-96' : 'flex-1'} ${currentTheme.colors.cardBg} border-r border-slate-800 overflow-y-auto flex-shrink-0 transition-all`}>
-                         <div className="p-2">
-                             {/* If Favorites view, maybe add a header */}
-                             {currentView === 'FAVORITES' && filteredStreams.length === 0 && (
-                                 <div className="text-center p-10 text-slate-500">
-                                     <Heart className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                     <p>No favorites added yet.</p>
-                                     <button onClick={() => setCurrentView('LIVE')} className="mt-4 text-sm text-cyan-400 hover:underline">Browse Channels</button>
-                                 </div>
-                             )}
-
-                             {filteredStreams.map(stream => {
-                                // Generate mini-epg for this item
-                                const epg = generateMockEPG(stream, currentTime);
-                                const totalDuration = epg.current.end.getTime() - epg.current.start.getTime();
-                                const elapsed = currentTime.getTime() - epg.current.start.getTime();
-                                const progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-                                const isFav = favorites.includes(stream.stream_id);
-
-                                return (
-                                <div 
-                                    key={stream.stream_id}
-                                    onClick={() => setSelectedStream(stream)}
-                                    className={`relative p-4 mb-2 rounded-xl cursor-pointer transition-all group ${selectedStream?.stream_id === stream.stream_id ? `bg-slate-700/50 border-l-4 ${currentTheme.colors.borderAccent}` : 'hover:bg-slate-700/30 border-l-4 border-transparent'}`}
-                                >
-                                    <div className="flex items-center gap-4 mb-2">
-                                        <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-slate-700">
-                                            <img src={stream.stream_icon} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                                            <span className="text-[10px] text-slate-600 font-bold absolute">TV</span>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between">
-                                                <h4 className={`font-bold text-sm truncate ${selectedStream?.stream_id === stream.stream_id ? 'text-white' : 'text-slate-300 group-hover:text-white'}`}>{stream.name}</h4>
-                                                <button 
-                                                    onClick={(e) => { e.stopPropagation(); toggleFavorite(stream.stream_id); }}
-                                                    className={`p-1.5 rounded-full hover:bg-white/10 transition-colors ${isFav ? 'text-pink-500' : 'text-slate-600 hover:text-pink-500'}`}
-                                                >
-                                                    <Heart size={14} className={isFav ? 'fill-current' : ''} />
-                                                </button>
-                                            </div>
-                                            <div className="flex items-center text-[11px] text-slate-500 mt-0.5">
-                                                <span className="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 mr-2">{stream.num}</span>
-                                                <span className={`${currentTheme.colors.textAccent}`}>Now:</span> <span className="ml-1 truncate max-w-[120px]">{epg.current.title}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* EPG Progress Bar */}
-                                    <div className="mt-1">
-                                        <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-                                            <span>{formatTime(epg.current.start)}</span>
-                                            <span>{formatTime(epg.current.end)}</span>
-                                        </div>
-                                        <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
-                                            <div className={`h-full ${currentTheme.colors.bgAccent}`} style={{ width: `${progress}%` }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                             )})}
-                        </div>
-                    </div>
-                    
-                    {/* Player */}
-                    {selectedStream ? (
-                        <div className="flex-1 bg-black flex flex-col relative fixed inset-0 z-50 md:static md:z-auto">
-                            <div className="flex-1 relative bg-black">
-                                <VideoPlayer 
-                                    key={selectedStream.stream_id} 
-                                    src={selectedStream.direct_source || ''} 
-                                    poster={selectedStream.stream_icon}
-                                    subtitles={selectedStream.subtitles}
-                                    onNext={handleNextStream}
-                                    isFavorite={favorites.includes(selectedStream.stream_id)}
-                                    onToggleFavorite={() => toggleFavorite(selectedStream.stream_id)}
-                                />
-                                {/* Mobile Back Button */}
-                                <button 
-                                    onClick={() => setSelectedStream(null)}
-                                    className="absolute top-4 left-4 z-40 bg-black/50 text-white p-2 rounded-full md:hidden backdrop-blur-md"
-                                >
-                                    <ArrowLeft size={24} />
-                                </button>
-                            </div>
-                            
-                            {/* Player Info Panel (EPG Detail) */}
-                            {selectedStreamEPG && (
-                                <div className={`h-auto ${currentTheme.colors.sidebar} p-6 border-t border-slate-800 hidden md:block`}>
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-white mb-2">{selectedStream.name}</h2>
-                                            <div className="flex items-center gap-3 text-sm text-slate-400">
-                                                <span className={`${currentTheme.colors.iconBg} ${currentTheme.colors.textAccent} px-2 py-0.5 rounded text-xs font-bold uppercase`}>Live</span>
-                                                <span>1080p</span>
-                                                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Now Playing</span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className={`text-3xl font-bold ${currentTheme.colors.textAccent}`}>{formatTime(currentTime)}</div>
-                                            <div className="text-slate-500 text-xs uppercase font-bold tracking-wider">{currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <div className="md:col-span-2 p-4 rounded-xl bg-slate-800/50 border border-white/5">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-bold text-white text-lg">{selectedStreamEPG.current.title}</h3>
-                                                <span className="text-xs text-slate-400 bg-black/30 px-2 py-1 rounded">
-                                                    {formatTime(selectedStreamEPG.current.start)} - {formatTime(selectedStreamEPG.current.end)}
-                                                </span>
-                                            </div>
-                                            <p className="text-slate-400 text-sm leading-relaxed">{selectedStreamEPG.current.description}</p>
-                                            <div className="mt-4 h-1.5 bg-slate-700 rounded-full overflow-hidden w-full">
-                                                <div 
-                                                    className={`h-full ${currentTheme.colors.bgAccent}`} 
-                                                    style={{ 
-                                                        width: `${Math.min(100, Math.max(0, ((currentTime.getTime() - selectedStreamEPG.current.start.getTime()) / (selectedStreamEPG.current.end.getTime() - selectedStreamEPG.current.start.getTime())) * 100))}%` 
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="p-4 rounded-xl bg-slate-800/30 border border-white/5 flex flex-col justify-center">
-                                            <div className="text-xs font-bold text-slate-500 uppercase mb-2">Up Next</div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                 <Calendar className="w-4 h-4 text-slate-400" />
-                                                 <span className="font-bold text-white">{selectedStreamEPG.next.title}</span>
-                                            </div>
-                                            <div className="text-xs text-slate-400 ml-6">
-                                                {formatTime(selectedStreamEPG.next.start)} - {formatTime(selectedStreamEPG.next.end)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className={`hidden md:flex flex-1 flex-col items-center justify-center text-slate-600 ${currentTheme.colors.background} p-8 text-center`}>
-                            <div className="w-24 h-24 bg-slate-800/50 rounded-full flex items-center justify-center mb-6">
-                                {currentView === 'FAVORITES' ? <Heart className="w-10 h-10 opacity-30 fill-current text-pink-500" /> : <Tv className="w-10 h-10 opacity-30" />}
-                            </div>
-                            <h3 className="text-lg font-medium text-slate-400">
-                                {currentView === 'FAVORITES' ? 'Select a favorite to watch' : 'Select a channel to start watching'}
-                            </h3>
-                            <p className="text-sm text-slate-500 mt-2 max-w-xs">
-                                {currentView === 'FAVORITES' ? 'Add channels to your favorites list to see them here.' : 'Choose from the categories on the left to browse available channels.'}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* --- MOVIES / SERIES VIEW (Grid Layout) - AND FAVORITES GRID if VOD --- */}
-            {(currentView === 'MOVIES' || currentView === 'SERIES' || (currentView === 'FAVORITES' && !filteredStreams.some(s => s.stream_type === StreamType.LIVE))) && (
-                <div className="h-full flex flex-col">
-                    {/* Filter Bar - Hide in Favorites */}
-                    {currentView !== 'FAVORITES' && (
-                        <div className="h-14 border-b border-white/5 bg-slate-900/20 flex items-center px-4 md:px-6 gap-2 md:gap-4 overflow-x-auto">
-                            <button
-                                onClick={() => setSelectedCategory(null)}
-                                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition-all ${!selectedCategory ? `${currentTheme.colors.bgAccent} text-white` : 'bg-slate-800 text-slate-400 hover:text-white'}`}
-                            >
-                                All
-                            </button>
-                            {activeCategories.map(cat => (
-                                <button
-                                    key={cat.category_id}
-                                    onClick={() => setSelectedCategory(cat.category_id)}
-                                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategory === cat.category_id ? `${currentTheme.colors.bgAccent} text-white` : 'bg-slate-800 text-slate-400 hover:text-white'}`}
-                                >
-                                    {cat.category_name}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-
-                    {selectedStream ? (
-                        /* Detail / Player View for VOD */
-                        <div className={`flex-1 ${currentTheme.colors.sidebar} overflow-y-auto fixed inset-0 z-50 md:static md:z-auto`}>
-                            <div className="relative h-[40vh] md:h-[50vh] w-full bg-black">
-                                <div className="absolute inset-0">
-                                    <VideoPlayer 
-                                        key={selectedStream.stream_id} 
-                                        src={selectedStream.direct_source || ''} 
-                                        poster={selectedStream.stream_icon} 
-                                        onProgress={handleStreamProgress}
-                                        subtitles={selectedStream.subtitles}
-                                        onNext={handleNextStream}
-                                        isFavorite={favorites.includes(selectedStream.stream_id)}
-                                        onToggleFavorite={() => toggleFavorite(selectedStream.stream_id)}
-                                    />
-                                </div>
-                                <button 
-                                    onClick={() => setSelectedStream(null)}
-                                    className="absolute top-4 left-4 z-40 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-md transition-all"
-                                >
-                                    <ArrowLeft className="w-6 h-6" />
-                                </button>
-                            </div>
-                            <div className="p-4 md:p-8 max-w-5xl mx-auto">
-                                <div className="flex flex-col md:flex-row gap-8">
-                                    <img src={selectedStream.stream_icon} className="w-full md:w-48 h-auto md:h-72 rounded-xl object-cover shadow-2xl shadow-black/50 hidden md:block" />
-                                    <div>
-                                        <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 md:mb-4">{selectedStream.name}</h1>
-                                        <div className="flex items-center gap-4 mb-4 md:mb-6">
-                                            <span className="flex items-center text-yellow-400 font-bold"><Star className="w-4 h-4 fill-current mr-1" /> {selectedStream.rating || 'N/A'}</span>
-                                            <span className="text-slate-400 text-sm">{selectedStream.stream_type === StreamType.MOVIE ? '2023 • 2h 14m' : '3 Seasons'}</span>
-                                            <span className="border border-slate-600 px-2 py-0.5 rounded text-xs text-slate-300">HD</span>
-                                            {selectedStream.subtitles && selectedStream.subtitles.length > 0 && (
-                                                <span className="border border-slate-600 px-2 py-0.5 rounded text-xs text-slate-300 flex items-center gap-1"><Captions size={10} /> CC</span>
-                                            )}
-                                        </div>
-                                        {/* Dynamic Progress indicator if playing */}
-                                        {selectedStream.progress && selectedStream.progress > 0 && (
-                                            <div className="mb-6 w-full max-w-md">
-                                                <div className="flex justify-between text-xs text-slate-400 mb-1">
-                                                    <span>Resume watching</span>
-                                                    <span>{selectedStream.progress}% complete</span>
-                                                </div>
-                                                <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                                                    <div className={`h-full ${currentTheme.colors.bgAccent}`} style={{ width: `${selectedStream.progress}%` }}></div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <p className="text-slate-300 leading-relaxed text-sm md:text-lg mb-6 md:mb-8">
-                                            Experience high-definition streaming with {selectedStream.name}. 
-                                            This content is streamed directly from our secure XTream Codes compatible servers.
-                                            Enjoy buffer-free playback and crystal clear audio.
-                                        </p>
-                                        <div className="flex gap-4">
-                                            <button className={`${currentTheme.colors.bgAccent} text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity w-full md:w-auto justify-center`}>
-                                                <Play className="w-5 h-5 fill-current" /> {selectedStream.progress && selectedStream.progress > 0 ? 'Resume' : 'Play'}
-                                            </button>
-                                            <button 
-                                                onClick={() => toggleFavorite(selectedStream.stream_id)}
-                                                className="bg-slate-800 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-slate-700 transition-colors hidden md:flex"
-                                            >
-                                                <Heart className={`w-5 h-5 ${favorites.includes(selectedStream.stream_id) ? 'fill-pink-500 text-pink-500' : ''}`} /> 
-                                                {favorites.includes(selectedStream.stream_id) ? 'Favorited' : 'Favorite'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        /* Grid View */
-                        <div className="flex-1 overflow-y-auto p-4 md:p-6">
-                            {currentView === 'FAVORITES' && filteredStreams.length === 0 && (
-                                 <div className="text-center p-10 text-slate-500">
-                                     <Heart className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                     <p>No favorites added yet.</p>
-                                     <button onClick={() => setCurrentView('MOVIES')} className="mt-4 text-sm text-cyan-400 hover:underline">Browse Movies</button>
-                                 </div>
-                             )}
-
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                                {filteredStreams.map(stream => (
-                                    <div 
-                                        key={stream.stream_id}
-                                        onClick={() => setSelectedStream(stream)}
-                                        className="group cursor-pointer flex flex-col"
-                                    >
-                                        <div className={`relative aspect-[2/3] rounded-xl overflow-hidden mb-3 ${currentTheme.colors.cardBg} shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-2`}>
-                                            <img src={stream.stream_icon} alt={stream.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-                                                <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center mx-auto mb-2 transform scale-0 group-hover:scale-100 transition-transform delay-100">
-                                                    <Play className="w-4 h-4 fill-current ml-0.5" />
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Favorite Heart Overlay for Grid */}
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); toggleFavorite(stream.stream_id); }}
-                                                className="absolute top-2 right-2 bg-black/40 backdrop-blur-md p-1.5 rounded-full hover:bg-black/60 transition-colors z-10"
-                                            >
-                                                <Heart size={14} className={favorites.includes(stream.stream_id) ? "fill-pink-500 text-pink-500" : "text-white"} />
-                                            </button>
-
-                                            {stream.rating && (
-                                                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-bold text-yellow-400 flex items-center">
-                                                    <Star className="w-3 h-3 fill-current mr-0.5" /> {stream.rating}
-                                                </div>
-                                            )}
-                                            {/* Grid Item Progress Bar */}
-                                            {stream.progress && stream.progress > 0 && (
-                                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-700/50">
-                                                    <div className={`h-full ${currentTheme.colors.bgAccent}`} style={{ width: `${stream.progress}%` }}></div>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <h3 className="text-xs md:text-sm font-medium text-slate-300 truncate group-hover:text-white transition-colors">{stream.name}</h3>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* --- AI SEARCH VIEW --- */}
-            {currentView === 'AI_SEARCH' && (
-                <div className="max-w-4xl mx-auto p-4 md:p-6 flex flex-col h-full">
-                    <div className={`flex-1 overflow-y-auto mb-4 md:mb-6 ${currentTheme.colors.cardBg} rounded-3xl p-6 md:p-8 border border-white/5 shadow-2xl`}>
-                        {aiResponse ? (
-                            <div className="flex items-start gap-4 md:gap-6 animate-fadeIn">
-                                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br ${currentTheme.colors.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
-                                    <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                                </div>
-                                <div className="space-y-4 flex-1">
-                                    <h3 className={`font-bold text-lg ${currentTheme.colors.textAccent}`}>Genie Suggests:</h3>
-                                    <div className="text-slate-300 leading-relaxed whitespace-pre-line text-sm md:text-lg">
-                                        {aiResponse}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-center">
-                                <div className={`w-16 h-16 md:w-20 md:h-20 ${currentTheme.colors.iconBg} rounded-full flex items-center justify-center mb-6 animate-pulse`}>
-                                    <Sparkles className={`w-8 h-8 md:w-10 md:h-10 ${currentTheme.colors.textAccent}`} />
-                                </div>
-                                <h3 className="text-xl md:text-2xl font-bold text-white mb-3">AI Content Curator</h3>
-                                <p className="text-slate-400 max-w-md text-sm md:text-base">
-                                    "I'm in the mood for an 80s action movie with a high rating" <br/>
-                                    "Show me sports channels showing football"
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="relative group">
-                        <input
-                            type="text"
-                            value={aiQuery}
-                            onChange={(e) => setAiQuery(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
-                            placeholder="Ask Genie for recommendations..."
-                            className={`w-full ${currentTheme.colors.cardBg} border border-slate-700/50 rounded-2xl py-4 md:py-5 pl-6 pr-16 text-white placeholder-slate-500 focus:outline-none focus:${currentTheme.colors.borderAccent} focus:ring-1 focus:ring-opacity-50 transition-all shadow-xl text-sm md:text-base`}
-                        />
-                        <button 
-                            onClick={handleAskAI}
-                            disabled={aiLoading}
-                            className={`absolute right-2 md:right-3 top-2 md:top-3 bottom-2 md:bottom-3 ${currentTheme.colors.bgAccent} hover:opacity-90 text-white p-2 md:p-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed aspect-square flex items-center justify-center shadow-lg`}
-                        >
-                            {aiLoading ? <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send className="w-4 h-4 md:w-5 md:h-5" />}
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* --- UPDATES VIEW --- */}
-            {currentView === 'UPDATES' && (
-                <div className="h-full flex items-center justify-center p-4">
-                    <div className={`w-full max-w-md ${currentTheme.colors.cardBg} p-8 rounded-3xl border border-white/5 shadow-2xl text-center relative overflow-hidden`}>
-                        {/* Background Decoration */}
-                        <div className={`absolute top-0 left-0 w-full h-2 ${currentTheme.colors.bgAccent}`}></div>
-                        
-                        <div className="mb-6 relative">
-                             <div className={`w-20 h-20 mx-auto rounded-full bg-slate-800 flex items-center justify-center mb-4 relative z-10`}>
-                                 {updateStatus === 'checking' || updateStatus === 'downloading' ? (
-                                     <RefreshCw className={`w-10 h-10 ${currentTheme.colors.textAccent} animate-spin`} />
-                                 ) : updateStatus === 'available' ? (
-                                     <CloudDownload className="w-10 h-10 text-emerald-400" />
-                                 ) : updateStatus === 'completed' ? (
-                                     <Check className="w-10 h-10 text-emerald-400" />
-                                 ) : (
-                                     <RefreshCw className="w-10 h-10 text-slate-400" />
-                                 )}
-                             </div>
-                             {updateStatus === 'downloading' && (
-                                 <div className="absolute inset-0 flex items-center justify-center z-0 opacity-20">
-                                     <div className={`w-24 h-24 rounded-full ${currentTheme.colors.bgAccent} animate-ping`}></div>
-                                 </div>
-                             )}
-                        </div>
-
-                        <h2 className="text-2xl font-bold text-white mb-2">System Updates</h2>
-                        
-                        {updateStatus === 'idle' && (
-                            <>
-                                <p className="text-slate-400 mb-8">Current Version: <span className="text-white font-mono">v2.4.1</span></p>
-                                <button 
-                                    onClick={checkForUpdates}
-                                    className={`${currentTheme.colors.bgAccent} hover:opacity-90 text-white font-bold py-3 px-8 rounded-xl transition-all w-full shadow-lg`}
-                                >
-                                    Check for Updates
-                                </button>
-                            </>
-                        )}
-
-                        {updateStatus === 'checking' && (
-                            <p className="text-slate-300 animate-pulse">Checking for available updates...</p>
-                        )}
-
-                        {updateStatus === 'available' && (
-                            <div className="animate-fadeIn">
-                                <p className="text-emerald-400 font-bold mb-2">New Version Available!</p>
-                                <p className="text-white text-xl font-bold mb-4">v2.5.0</p>
-                                <ul className="text-left text-sm text-slate-400 mb-6 bg-black/20 p-4 rounded-xl space-y-2">
-                                    <li className="flex items-start gap-2"><Check size={14} className="mt-1 text-emerald-500" /> Improved streaming stability</li>
-                                    <li className="flex items-start gap-2"><Check size={14} className="mt-1 text-emerald-500" /> New 4K content support</li>
-                                    <li className="flex items-start gap-2"><Check size={14} className="mt-1 text-emerald-500" /> Minor bug fixes</li>
-                                </ul>
-                                <button 
-                                    onClick={startUpdate}
-                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-all w-full shadow-lg flex items-center justify-center gap-2"
-                                >
-                                    <CloudDownload size={20} /> Update Now
-                                </button>
-                            </div>
-                        )}
-
-                        {updateStatus === 'downloading' && (
-                            <div className="animate-fadeIn">
-                                <p className="text-slate-300 mb-4">Downloading update files...</p>
-                                <div className="h-4 bg-slate-800 rounded-full overflow-hidden w-full mb-2">
-                                    <div 
-                                        className={`h-full ${currentTheme.colors.bgAccent} transition-all duration-300`} 
-                                        style={{ width: `${updateProgress}%` }}
-                                    ></div>
-                                </div>
-                                <p className="text-xs text-slate-500 text-right">{Math.round(updateProgress)}%</p>
-                            </div>
-                        )}
-
-                        {updateStatus === 'completed' && (
-                            <div className="animate-fadeIn">
-                                <p className="text-emerald-400 font-bold mb-2">Update Complete!</p>
-                                <p className="text-slate-400 text-sm">Restarting application...</p>
-                            </div>
-                        )}
-                        
-                        <div className="mt-6 pt-6 border-t border-white/5">
-                            <p className="text-xs text-slate-600">
-                                Automatic updates ensure you always have the latest features and security patches.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
+            
             {/* --- SETTINGS / THEMES VIEW --- */}
             {currentView === 'SETTINGS' && (
                 <div className="p-4 md:p-8 h-full overflow-y-auto">
                     <div className="max-w-5xl mx-auto">
+                        
+                        {/* Account Info Section */}
+                        <div className="mb-10 border-b border-white/5 pb-10">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+                                    <ShieldCheck className={`w-6 h-6 mr-3 ${currentTheme.colors.textAccent}`} />
+                                    Account Information
+                                </h2>
+                                <p className="text-slate-400">Subscription details and server status.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Status Card */}
+                                <div className={`p-5 rounded-2xl ${currentTheme.colors.cardBg} border border-white/5 relative overflow-hidden`}>
+                                     <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                                            <User className="w-6 h-6 text-emerald-500" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Status</div>
+                                            <div className="text-lg font-bold text-white flex items-center gap-2">
+                                                Active <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            </div>
+                                            <div className="text-xs text-slate-500 mt-0.5">{credentials.username}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Expiry Card */}
+                                <div className={`p-5 rounded-2xl ${currentTheme.colors.cardBg} border border-white/5 relative overflow-hidden`}>
+                                     <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                            <Calendar className="w-6 h-6 text-blue-500" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Expires</div>
+                                            <div className="text-lg font-bold text-white">Dec 31, 2025</div>
+                                            <div className="text-xs text-slate-500 mt-0.5">245 Days Remaining</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                 {/* Connection Card */}
+                                 <div className={`p-5 rounded-2xl ${currentTheme.colors.cardBg} border border-white/5 relative overflow-hidden`}>
+                                     <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                            <Activity className="w-6 h-6 text-purple-500" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Connections</div>
+                                            <div className="text-lg font-bold text-white">1 / 3 Active</div>
+                                            <div className="text-xs text-slate-500 mt-0.5">Max allowed devices</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                 {/* Server Card */}
+                                 <div className={`p-5 rounded-2xl ${currentTheme.colors.cardBg} border border-white/5 relative overflow-hidden`}>
+                                     <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                                            <Server className="w-6 h-6 text-orange-500" />
+                                        </div>
+                                        <div className="overflow-hidden">
+                                            <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Server DNS</div>
+                                            <div className="text-lg font-bold text-white truncate">{credentials.url || 'http://dns.provider.com:3330'}</div>
+                                            <div className="text-xs text-slate-500 mt-0.5">Port 3330</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="mb-8">
                             <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
                                 <Palette className={`w-6 h-6 mr-3 ${currentTheme.colors.textAccent}`} />
