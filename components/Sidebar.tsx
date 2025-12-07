@@ -27,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, onLogout, 
   return (
     <>
       {/* Desktop Sidebar (lg screens) */}
-      <div className={`hidden md:flex w-20 lg:w-64 h-screen ${theme.colors.sidebar} border-r border-white/5 flex-col justify-between transition-all duration-500 z-50 flex-shrink-0 backdrop-blur-xl relative overflow-hidden shadow-[5px_0_30px_rgba(0,0,0,0.5)]`}>
+      <div className={`hidden md:flex w-20 lg:w-64 h-screen ${theme.colors.sidebar} border-r border-white/5 flex-col justify-between transition-all duration-500 z-50 flex-shrink-0 backdrop-blur-2xl relative overflow-hidden shadow-[5px_0_30px_rgba(0,0,0,0.5)]`}>
         
         {/* Glow effect */}
         <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${theme.colors.gradient} opacity-10 blur-3xl`}></div>

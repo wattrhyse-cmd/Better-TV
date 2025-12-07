@@ -7,9 +7,9 @@ export const APP_THEMES: AppTheme[] = [
     id: 'cyberpunk',
     name: 'Neon City',
     colors: {
-      background: 'bg-[#030014]', // Deepest space blue/black
-      sidebar: 'bg-[#0a0a1f]/60',
-      cardBg: 'bg-[#1a1a40]/40',
+      background: 'bg-[#050510]', 
+      sidebar: 'bg-[#0a0a1f]/70',
+      cardBg: 'bg-[#12122a]/60',
       textAccent: 'text-cyan-400',
       bgAccent: 'bg-cyan-500',
       bgAccentHover: 'hover:bg-cyan-400',
@@ -23,8 +23,8 @@ export const APP_THEMES: AppTheme[] = [
     name: 'Synthwave',
     colors: {
       background: 'bg-[#0f0014]',
-      sidebar: 'bg-[#1a0024]/60',
-      cardBg: 'bg-[#2a0038]/40',
+      sidebar: 'bg-[#1a0024]/70',
+      cardBg: 'bg-[#2a0038]/60',
       textAccent: 'text-fuchsia-400',
       bgAccent: 'bg-fuchsia-600',
       bgAccentHover: 'hover:bg-fuchsia-500',
@@ -38,8 +38,8 @@ export const APP_THEMES: AppTheme[] = [
     name: 'Matrix',
     colors: {
       background: 'bg-[#000d00]',
-      sidebar: 'bg-[#001a00]/60',
-      cardBg: 'bg-[#002b00]/40',
+      sidebar: 'bg-[#001a00]/70',
+      cardBg: 'bg-[#002b00]/60',
       textAccent: 'text-green-400',
       bgAccent: 'bg-green-600',
       bgAccentHover: 'hover:bg-green-500',
@@ -53,8 +53,8 @@ export const APP_THEMES: AppTheme[] = [
     name: 'Solar Flare',
     colors: {
       background: 'bg-[#0f0500]',
-      sidebar: 'bg-[#1f0a00]/60',
-      cardBg: 'bg-[#331100]/40',
+      sidebar: 'bg-[#1f0a00]/70',
+      cardBg: 'bg-[#331100]/60',
       textAccent: 'text-orange-400',
       bgAccent: 'bg-orange-600',
       bgAccentHover: 'hover:bg-orange-500',
